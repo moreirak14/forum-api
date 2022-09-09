@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+
 from apps.post.models import Post
 from apps.post.serializers import PostSerializer
 
