@@ -45,7 +45,7 @@ APIRouter.register(r"posts", PostViewSets, basename="Posts")
 APIRouter.register(r"comments", CommentViewSets, basename="Comments")
 
 urlpatterns = [
-    path("api/v1/", include(APIRouter.urls)),
+    path("", include(APIRouter.urls)),
     path("api/token/", TokenObtainPairView.as_view()),
     path("api/token/refresh/", TokenRefreshView.as_view()),
     path("api/token/verify/", TokenVerifyView.as_view()),
