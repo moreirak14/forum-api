@@ -4,6 +4,8 @@ from apps.post.models import Post
 
 
 class PostSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="author.email")
+
     class Meta:
         model = Post
-        fields = "__all__"
+        fields = ["id", "title", "description", "author"]
