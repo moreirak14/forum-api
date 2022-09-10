@@ -18,6 +18,11 @@ from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 from apps.comment.views import CommentViewSets
 from apps.post.views import PostViewSets
@@ -41,6 +46,9 @@ APIRouter.register(r"comments", CommentViewSets, basename="Comments")
 
 urlpatterns = [
     path("api/v1/", include(APIRouter.urls)),
+    path("api/token/", TokenObtainPairView.as_view()),
+    path("api/token/refresh/", TokenRefreshView.as_view()),
+    path("api/token/verify/", TokenVerifyView.as_view()),
     path("admin/", admin.site.urls),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
