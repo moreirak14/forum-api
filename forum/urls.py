@@ -19,6 +19,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
 
+from apps.comment.views import CommentViewSets
 from apps.post.views import PostViewSets
 
 schema_view = get_schema_view(
@@ -36,6 +37,7 @@ schema_view = get_schema_view(
 
 APIRouter = routers.DefaultRouter()
 APIRouter.register(r"posts", PostViewSets, basename="Posts")
+APIRouter.register(r"comments", CommentViewSets, basename="Comments")
 
 urlpatterns = [
     path("api/v1/", include(APIRouter.urls)),
