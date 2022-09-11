@@ -1,2 +1,3 @@
 # Environments for default use in application
 [default]
+URL_GEOLOCATION="http://ip-api.com/json/"
