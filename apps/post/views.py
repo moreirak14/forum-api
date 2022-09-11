@@ -13,10 +13,47 @@ class PostViewSets(ModelViewSet):
 
     def create(self, request: Request, *args, **kwargs):
         if request.user.is_anonymous:
-            return
+            data = dict(message="Please register to continue...")
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
-        data = request.data
-        serializer = PostSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
+        if request.user.is_authenticated:
+            data = request.data
+            serializer = PostSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(author=request.user)
+        else:
+            data = dict(message="Unauthenticated user or rule violation")
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request: Request, *args, **kwargs):
+        if request.user.is_anonymous:
+            data = dict(message="Please register to continue...")
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+        instance = Post.objects.get(id=kwargs["pk"])
+        if request.user.is_authenticated and request.user == instance.author:
+            data = request.data
+            serializer = PostSerializer(instance, data=data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        else:
+            data = dict(message="Unauthenticated user or rule violation")
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            data = dict(message="Please register to continue...")
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+        instance = Post.objects.get(id=kwargs["pk"])
+        if request.user.is_authenticated and request.user == instance.author:
+            instance.delete()
+        else:
+            data = dict(message="Unauthenticated user or rule violation")
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
