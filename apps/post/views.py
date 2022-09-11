@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -5,16 +7,19 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.post.models import Post
 from apps.post.serializers import PostSerializer
+from apps.post.services.geolocation import GeolocationAPI
+
+logger = logging.getLogger(__name__)
 
 
 class PostViewSets(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    service = GeolocationAPI()
 
     def create(self, request: Request, *args, **kwargs):
         if request.user.is_anonymous:
-            data = dict(message="Please register to continue...")
-            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+            return self._user_is_anonymous()
 
         if request.user.is_authenticated:
             data = request.data
@@ -29,8 +34,7 @@ class PostViewSets(ModelViewSet):
 
     def update(self, request: Request, *args, **kwargs):
         if request.user.is_anonymous:
-            data = dict(message="Please register to continue...")
-            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+            return self._user_is_anonymous()
 
         instance = Post.objects.get(id=kwargs["pk"])
         if request.user.is_authenticated and request.user == instance.author:
@@ -46,8 +50,7 @@ class PostViewSets(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         if request.user.is_anonymous:
-            data = dict(message="Please register to continue...")
-            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+            return self._user_is_anonymous()
 
         instance = Post.objects.get(id=kwargs["pk"])
         if request.user.is_authenticated and request.user == instance.author:
@@ -57,3 +60,9 @@ class PostViewSets(ModelViewSet):
             return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _user_is_anonymous(self):
+        geolocation = self.service.geolocation_api()
+        logger.exception(f"Anonymous user details: {geolocation}")
+        data = dict(message="Please register to continue...")
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
